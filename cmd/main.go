@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func Main(configPath string) error {
+func Main(configPath, address string) error {
 	cnf, err := config.ParseBalancerConfig(configPath)
 	if err != nil {
 		return fmt.Errorf("failed to parse Balancer config: %w", err)
@@ -20,19 +20,19 @@ func Main(configPath string) error {
 		return fmt.Errorf("failed to get balancer from config: %w", err)
 	}
 
-	fmt.Println("balancer started at port 127.0.0.1:8080")
-	return http.ListenAndServe("127.0.0.1:8080", b)
+	fmt.Println("balancer started at address: " + address)
+	return http.ListenAndServe(address, b)
 }
 
 func GetStarterCmd() *cobra.Command {
-	var configPath string
+	var configPath, address string
 
 	cmd := &cobra.Command{
 		Use:     "start",
 		Version: "0.0.1",
 		Short:   "launch load balancer",
 		Run: func(cmd *cobra.Command, args []string) {
-			err := Main(configPath)
+			err := Main(configPath, address)
 			if err != nil {
 				_, _ = fmt.Fprintln(os.Stderr, err)
 				os.Exit(1)
@@ -41,7 +41,9 @@ func GetStarterCmd() *cobra.Command {
 	}
 
 	cmd.Flags().StringVar(&configPath, "config", "", "path to config file")
+	cmd.Flags().StringVar(&address, "address", "", "address of balancer")
 	_ = cmd.MarkFlagRequired("config")
+	_ = cmd.MarkFlagRequired("address")
 
 	return cmd
 }
