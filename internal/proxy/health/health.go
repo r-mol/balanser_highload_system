@@ -15,11 +15,20 @@ var (
 )
 
 var defaultHealthCheck = func(addr *url.URL) bool {
-	conn, err := net.DialTimeout("tcp", addr.Host, defaultHealthCheckTimeout)
+	host := addr.Hostname()
+	port := addr.Port()
+
+	if port == "" {
+		port = "443"
+	}
+
+	conn, err := net.DialTimeout("tcp", net.JoinHostPort(host, port), defaultHealthCheckTimeout)
+	fmt.Println(err)
 	if err != nil {
 		return false
 	}
 	_ = conn.Close()
+
 	return true
 }
 

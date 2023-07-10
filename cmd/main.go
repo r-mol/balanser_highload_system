@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 	"github.com/r-mol/balanser_highload_system/config"
+	log "github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
 	"net/http"
 	"os"
-
-	"github.com/spf13/cobra"
 )
 
 func Main(configPath, address string) error {
@@ -20,7 +20,7 @@ func Main(configPath, address string) error {
 		return fmt.Errorf("failed to get balancer from config: %w", err)
 	}
 
-	fmt.Println("balancer started at address: " + address)
+	log.Infoln("balancer started at address: " + address)
 	return http.ListenAndServe(address, b)
 }
 
@@ -34,7 +34,7 @@ func GetStarterCmd() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			err := Main(configPath, address)
 			if err != nil {
-				_, _ = fmt.Fprintln(os.Stderr, err)
+				fmt.Fprintln(os.Stderr, err)
 				os.Exit(1)
 			}
 		},
