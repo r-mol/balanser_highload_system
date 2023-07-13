@@ -2,12 +2,13 @@ package balancer
 
 import (
 	"fmt"
-	"github.com/r-mol/balanser_highload_system/internal/proxy"
 	"net/http"
 	"sync"
+
+	"github.com/r-mol/balanser_highload_system/internal/proxy"
 )
 
-type Balancer struct {
+type LoadBalancer struct {
 	proxies weightedProxiesBunch
 
 	mu       sync.Mutex
@@ -15,7 +16,7 @@ type Balancer struct {
 	reqCount int32
 }
 
-func New(o ...Option) (*Balancer, error) {
+func New(o ...Option) (*LoadBalancer, error) {
 	opts := &Options{}
 
 	for _, option := range o {
@@ -27,14 +28,14 @@ func New(o ...Option) (*Balancer, error) {
 		return nil, fmt.Errorf("\"proxies\" is not provided")
 	}
 
-	return &Balancer{
+	return &LoadBalancer{
 		proxies: opts.proxies,
 		mu:      opts.mu,
 	}, nil
 }
 
-func (l *Balancer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	p, err := l.Next()
+func (lb *LoadBalancer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	p, err := lb.Next()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(fmt.Sprintf("The server didn't respond: %s", err)))
@@ -43,16 +44,16 @@ func (l *Balancer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	p.ServeHTTP(w, r)
 }
 
-func (l *Balancer) Next() (*proxy.Proxy, error) {
-	l.mu.Lock()
-	defer l.mu.Unlock()
+func (lb *LoadBalancer) Next() (*proxy.Proxy, error) {
+	lb.mu.Lock()
+	defer lb.mu.Unlock()
 
-	currentProxy := l.proxies[l.current]
-	if l.reqCount < currentProxy.weight {
-		l.reqCount++
+	currentProxy := lb.proxies[lb.current]
+	if lb.reqCount < currentProxy.weight {
+		lb.reqCount++
 	} else {
-		l.current = (l.current + 1) % int32(len(l.proxies))
-		l.reqCount = 1
+		lb.current = (lb.current + 1) % int32(len(lb.proxies))
+		lb.reqCount = 1
 	}
-	return getAvailableProxy(l.proxies, int(l.current))
+	return getAvailableProxy(lb.proxies, int(lb.current))
 }

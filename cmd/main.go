@@ -2,26 +2,35 @@ package main
 
 import (
 	"fmt"
-	"github.com/r-mol/balanser_highload_system/config"
-	log "github.com/sirupsen/logrus"
-	"github.com/spf13/cobra"
-	"net/http"
+	"github.com/r-mol/balanser_highload_system/internal/handler"
 	"os"
+
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"github.com/r-mol/balanser_highload_system/config"
+	"github.com/spf13/cobra"
 )
 
 func Main(configPath, address string) error {
+	e := echo.New()
+	e.Use(middleware.Recover())
+	e.Use(middleware.Logger())
+
 	cnf, err := config.ParseBalancerConfig(configPath)
 	if err != nil {
-		return fmt.Errorf("failed to parse Balancer config: %w", err)
+		return fmt.Errorf("failed to parse LoadBalancer config: %w", err)
 	}
 
-	b, err := config.GetBalancerFromConfig(cnf)
+	lb, err := config.GetBalancerFromConfig(cnf)
 	if err != nil {
 		return fmt.Errorf("failed to get balancer from config: %w", err)
 	}
 
-	log.Infoln("balancer started at address: " + address)
-	return http.ListenAndServe(address, b)
+	e.Use(handler.MiddlewareBalancer(lb))
+
+	e.Logger.Fatal(e.Start(address))
+
+	return nil
 }
 
 func GetStarterCmd() *cobra.Command {

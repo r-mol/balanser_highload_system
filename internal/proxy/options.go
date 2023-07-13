@@ -1,8 +1,9 @@
 package proxy
 
 import (
-	"github.com/r-mol/balanser_highload_system/internal/proxy/health"
 	"net/http/httputil"
+
+	"github.com/r-mol/balanser_highload_system/internal/proxy/health"
 )
 
 type Options struct {

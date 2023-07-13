@@ -1,8 +1,9 @@
 package balancer
 
 import (
-	"github.com/r-mol/balanser_highload_system/internal/proxy"
 	"sync"
+
+	"github.com/r-mol/balanser_highload_system/internal/proxy"
 )
 
 type Options struct {

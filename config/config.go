@@ -2,13 +2,14 @@ package config
 
 import (
 	"fmt"
-	"github.com/r-mol/balanser_highload_system/internal/balancer"
-	"github.com/r-mol/balanser_highload_system/internal/proxy"
-	"github.com/r-mol/balanser_highload_system/internal/proxy/health"
 	"gopkg.in/yaml.v3"
 	"net/http/httputil"
 	"net/url"
 	"os"
+
+	"github.com/r-mol/balanser_highload_system/internal/balancer"
+	"github.com/r-mol/balanser_highload_system/internal/proxy"
+	"github.com/r-mol/balanser_highload_system/internal/proxy/health"
 )
 
 type BalancerConfig struct {
@@ -64,7 +65,7 @@ func ParseBalancerConfig(path string) (BalancerConfig, error) {
 	return config, nil
 }
 
-func GetBalancerFromConfig(config BalancerConfig) (*balancer.Balancer, error) {
+func GetBalancerFromConfig(config BalancerConfig) (*balancer.LoadBalancer, error) {
 	proxies := map[*proxy.Proxy]int32{}
 	for _, server := range config.Servers {
 		u, err := url.Parse(server.URL)
