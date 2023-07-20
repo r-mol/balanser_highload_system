@@ -5,7 +5,6 @@ import (
 	"fmt"
 	data_transfer_api "github.com/r-mol/balanser_highload_system/protos"
 	"google.golang.org/grpc"
-	"net/http"
 	"sync"
 
 	"github.com/r-mol/balanser_highload_system/internal/proxy"
@@ -26,10 +25,11 @@ func (lb *LoadBalancer) GetValue(ctx context.Context, request *data_transfer_api
 		return nil, fmt.Errorf("the server didn't respond: %s", err)
 	}
 
-	conn, err := grpc.Dial(p.GetHealth().Origin.Hostname())
+	conn, err := grpc.Dial(p.GetHost(), grpc.WithInsecure())
 	if err != nil {
 		panic(err)
 	}
+	defer conn.Close()
 
 	client := data_transfer_api.NewKeyValueServiceClient(conn)
 
@@ -42,10 +42,11 @@ func (lb *LoadBalancer) StoreValue(ctx context.Context, request *data_transfer_a
 		return nil, fmt.Errorf("the server didn't respond: %s", err)
 	}
 
-	conn, err := grpc.Dial(p.GetHealth().Origin.Host, grpc.WithInsecure())
+	conn, err := grpc.Dial(p.GetHost(), grpc.WithInsecure())
 	if err != nil {
 		panic(err)
 	}
+	defer conn.Close()
 
 	client := data_transfer_api.NewKeyValueServiceClient(conn)
 
@@ -68,16 +69,6 @@ func New(o ...Option) (*LoadBalancer, error) {
 		proxies: opts.proxies,
 		mu:      opts.mu,
 	}, nil
-}
-
-func (lb *LoadBalancer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	p, err := lb.Next()
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(fmt.Sprintf("The server didn't respond: %s", err)))
-		return
-	}
-	p.ServeHTTP(w, r)
 }
 
 func (lb *LoadBalancer) Next() (*proxy.Proxy, error) {

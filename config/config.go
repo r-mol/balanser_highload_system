@@ -3,13 +3,11 @@ package config
 import (
 	"fmt"
 	"gopkg.in/yaml.v3"
-	"net/http/httputil"
 	"net/url"
 	"os"
 
 	"github.com/r-mol/balanser_highload_system/internal/balancer"
 	"github.com/r-mol/balanser_highload_system/internal/proxy"
-	"github.com/r-mol/balanser_highload_system/internal/proxy/health"
 )
 
 type BalancerConfig struct {
@@ -73,16 +71,9 @@ func GetBalancerFromConfig(config BalancerConfig) (*balancer.LoadBalancer, error
 			return nil, fmt.Errorf("failed to parse url: %w", err)
 		}
 
-		h, err := health.New(health.WithOrigin(u))
+		p, err := proxy.New(proxy.WithOrigin(u))
 		if err != nil {
 			return nil, fmt.Errorf("failed to create new halth proxy: %w", err)
-		}
-		p, err := proxy.New(
-			proxy.WithProxy(httputil.NewSingleHostReverseProxy(u)),
-			proxy.WithHealth(h),
-		)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get new proxy: %w", err)
 		}
 
 		proxies[p] = server.Priority
