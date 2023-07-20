@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	data_transfer_api "github.com/r-mol/balanser_highload_system/protos"
+	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"sync"
 
@@ -17,6 +18,7 @@ type LoadBalancer struct {
 	mu       sync.Mutex
 	current  int32
 	reqCount int32
+	Logger   *log.Logger
 }
 
 func (lb *LoadBalancer) GetValue(ctx context.Context, request *data_transfer_api.GetValueRequest) (*data_transfer_api.GetValueResponse, error) {
@@ -37,6 +39,8 @@ func (lb *LoadBalancer) GetValue(ctx context.Context, request *data_transfer_api
 	if err != nil {
 		return nil, fmt.Errorf("failed to get value from host \"%s\": %w", p.GetHost(), err)
 	}
+
+	lb.Logger.Infof("get value from host \"%s\"\n", p.GetHost())
 
 	return response, nil
 }
@@ -60,6 +64,8 @@ func (lb *LoadBalancer) StoreValue(ctx context.Context, request *data_transfer_a
 		return nil, fmt.Errorf("failed to store value from host \"%s\": %w", p.GetHost(), err)
 	}
 
+	lb.Logger.Infof("store value from host \"%s\"\n", p.GetHost())
+
 	return response, nil
 }
 
@@ -78,6 +84,7 @@ func New(o ...Option) (*LoadBalancer, error) {
 	return &LoadBalancer{
 		proxies: opts.proxies,
 		mu:      opts.mu,
+		Logger:  opts.logger,
 	}, nil
 }
 

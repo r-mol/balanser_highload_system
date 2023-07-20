@@ -1,6 +1,7 @@
 package balancer
 
 import (
+	log "github.com/sirupsen/logrus"
 	"sync"
 
 	"github.com/r-mol/balanser_highload_system/internal/proxy"
@@ -9,6 +10,7 @@ import (
 type Options struct {
 	proxies weightedProxiesBunch
 	mu      sync.Mutex
+	logger  *log.Logger
 }
 
 type Option func(*Options)
@@ -28,5 +30,11 @@ func WithProxies(proxies map[*proxy.Proxy]int32) Option {
 func WithMutex(mu sync.Mutex) Option {
 	return func(opts *Options) {
 		opts.mu = mu
+	}
+}
+
+func WithLogger(logger *log.Logger) Option {
+	return func(opts *Options) {
+		opts.logger = logger
 	}
 }

@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 	"net/url"
 	"os"
@@ -79,7 +80,9 @@ func GetBalancerFromConfig(config BalancerConfig) (*balancer.LoadBalancer, error
 		proxies[p] = server.Priority
 	}
 
-	b, err := balancer.New(balancer.WithProxies(proxies))
+	logger := log.New()
+	logger.Level = log.DebugLevel
+	b, err := balancer.New(balancer.WithProxies(proxies), balancer.WithLogger(logger))
 	if err != nil {
 		return nil, fmt.Errorf("failed to get new balancer: %w", err)
 	}

@@ -8,7 +8,6 @@ import (
 	"os"
 
 	"github.com/r-mol/balanser_highload_system/config"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -23,7 +22,7 @@ func Main(configPath, address string) error {
 		return fmt.Errorf("failed to get balancer from config: %w", err)
 	}
 
-	log.Infoln("balancer started at address: " + address)
+	lb.Logger.Infoln("balancer started at address: ", address)
 	lis, err := net.Listen("tcp4", address)
 	if err != nil {
 		return fmt.Errorf("failed to listen: %w", err)
