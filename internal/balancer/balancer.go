@@ -1,7 +1,10 @@
 package balancer
 
 import (
+	"context"
 	"fmt"
+	data_transfer_api "github.com/r-mol/balanser_highload_system/protos"
+	"google.golang.org/grpc"
 	"net/http"
 	"sync"
 
@@ -9,11 +12,44 @@ import (
 )
 
 type LoadBalancer struct {
+	data_transfer_api.UnimplementedKeyValueServiceServer
 	proxies weightedProxiesBunch
 
 	mu       sync.Mutex
 	current  int32
 	reqCount int32
+}
+
+func (lb *LoadBalancer) GetValue(ctx context.Context, request *data_transfer_api.GetValueRequest) (*data_transfer_api.GetValueResponse, error) {
+	p, err := lb.Next()
+	if err != nil {
+		return nil, fmt.Errorf("the server didn't respond: %s", err)
+	}
+
+	conn, err := grpc.Dial(p.GetHealth().Origin.Hostname())
+	if err != nil {
+		panic(err)
+	}
+
+	client := data_transfer_api.NewKeyValueServiceClient(conn)
+
+	return client.GetValue(ctx, request)
+}
+
+func (lb *LoadBalancer) StoreValue(ctx context.Context, request *data_transfer_api.StoreValueRequest) (*data_transfer_api.StoreValueResponse, error) {
+	p, err := lb.Next()
+	if err != nil {
+		return nil, fmt.Errorf("the server didn't respond: %s", err)
+	}
+
+	conn, err := grpc.Dial(p.GetHealth().Origin.Host, grpc.WithInsecure())
+	if err != nil {
+		panic(err)
+	}
+
+	client := data_transfer_api.NewKeyValueServiceClient(conn)
+
+	return client.StoreValue(ctx, request)
 }
 
 func New(o ...Option) (*LoadBalancer, error) {

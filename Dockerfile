@@ -11,4 +11,4 @@ RUN go build -o balancer ./cmd/main.go
 
 EXPOSE 8080
 
-CMD ["./balancer", "start", "--config=/app/config/example-config.yaml", "--address=:8080"]
+CMD ["./balancer", "start", "--config=/app/config/example-config.yaml", "--address=0.0.0.0:8080"]

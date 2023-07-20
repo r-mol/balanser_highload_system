@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package data_transfer_api;
+
+option go_package = "./data_transfer_api";
+
+import "google/protobuf/timestamp.proto";
+
+service KeyValueService {
+  rpc GetValue(GetValueRequest) returns (GetValueResponse) {}
+  rpc StoreValue(StoreValueRequest) returns (StoreValueResponse) {}
+}
+
+message Value {
+  google.protobuf.Timestamp update_time = 1;
+  bytes payload = 2;
+}
+
+message StoreValueResponse {
+  int32 code = 1;
+  string message = 2;
+}
+
+message GetValueRequest {
+  string key = 1;
+}
+
+message GetValueResponse {
+  Value value = 1;
+}
+
+message StoreValueRequest {
+  string key = 1;
+  Value value = 2;
+}

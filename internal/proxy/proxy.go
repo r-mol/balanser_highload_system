@@ -48,6 +48,10 @@ func (p *Proxy) IsAvailable() bool {
 	return p.health.IsAvailable()
 }
 
+func (p *Proxy) GetHealth() *health.ProxyHealth {
+	return p.health
+}
+
 func (p *Proxy) SetHealthCheck(check func(addr *url.URL) bool, period time.Duration) {
 	p.health.SetHealthCheck(check, period)
 }

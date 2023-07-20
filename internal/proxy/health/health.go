@@ -26,7 +26,7 @@ var defaultHealthCheck = func(addr *url.URL) bool {
 }
 
 type ProxyHealth struct {
-	origin *url.URL
+	Origin *url.URL
 
 	mu          sync.Mutex
 	check       func(addr *url.URL) bool
@@ -47,13 +47,13 @@ func New(o ...Option) (*ProxyHealth, error) {
 
 	switch {
 	case opts.origin == nil:
-		return nil, fmt.Errorf("\"origin\" is not provided")
+		return nil, fmt.Errorf("\"Origin\" is not provided")
 	case !opts.isAvailable:
 		opts.isAvailable = opts.check(opts.origin)
 	}
 
 	h := &ProxyHealth{
-		origin:      opts.origin,
+		Origin:      opts.origin,
 		mu:          opts.mu,
 		check:       opts.check,
 		period:      opts.period,
@@ -79,7 +79,7 @@ func (h *ProxyHealth) SetHealthCheck(check func(addr *url.URL) bool, period time
 	h.check = check
 	h.period = period
 	h.cancel = make(chan struct{})
-	h.isAvailable = h.check(h.origin)
+	h.isAvailable = h.check(h.Origin)
 	h.run()
 }
 
@@ -93,7 +93,7 @@ func (h *ProxyHealth) run() {
 	checkHealth := func() {
 		h.mu.Lock()
 		defer h.mu.Unlock()
-		isAvailable := h.check(h.origin)
+		isAvailable := h.check(h.Origin)
 		h.isAvailable = isAvailable
 	}
 

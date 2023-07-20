@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
-	"net/http"
+	data_transfer_api "github.com/r-mol/balanser_highload_system/protos"
+	"google.golang.org/grpc"
+	"net"
 	"os"
 
 	"github.com/r-mol/balanser_highload_system/config"
@@ -22,7 +24,22 @@ func Main(configPath, address string) error {
 	}
 
 	log.Infoln("balancer started at address: " + address)
-	return http.ListenAndServe(address, lb)
+	lis, err := net.Listen("tcp4", address)
+	if err != nil {
+		return fmt.Errorf("failed to listen: %w", err)
+	}
+	defer lis.Close()
+
+	grpcServer := grpc.NewServer()
+	data_transfer_api.RegisterKeyValueServiceServer(grpcServer, lb)
+
+	err = grpcServer.Serve(lis)
+	if err != nil {
+		return fmt.Errorf("failed to serve: %w", err)
+	}
+
+	return nil
+
 }
 
 func GetStarterCmd() *cobra.Command {
