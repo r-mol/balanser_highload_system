@@ -29,5 +29,5 @@ func getAvailableProxy(proxies proxiesBunch, marker int) (*proxy.Proxy, error) {
 			return p, nil
 		}
 	}
-	return nil, fmt.Errorf("all proxies are unavailable2")
+	return nil, fmt.Errorf("all proxies are unavailable")
 }

@@ -15,7 +15,6 @@ var (
 )
 
 var defaultHealthCheck = func(addr *url.URL) bool {
-	// Dial a connection to the target server
 	conn, err := net.DialTimeout("tcp", addr.Host, defaultHealthCheckTimeout)
 	if err != nil {
 		return false

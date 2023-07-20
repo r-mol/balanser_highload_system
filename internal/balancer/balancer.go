@@ -27,13 +27,18 @@ func (lb *LoadBalancer) GetValue(ctx context.Context, request *data_transfer_api
 
 	conn, err := grpc.Dial(p.GetHost(), grpc.WithInsecure())
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("failed to dial grpc connection with \"%s\": %w", p.GetHost(), err)
 	}
 	defer conn.Close()
 
 	client := data_transfer_api.NewKeyValueServiceClient(conn)
 
-	return client.GetValue(ctx, request)
+	response, err := client.GetValue(ctx, request)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get value from host \"%s\": %w", p.GetHost(), err)
+	}
+
+	return response, nil
 }
 
 func (lb *LoadBalancer) StoreValue(ctx context.Context, request *data_transfer_api.StoreValueRequest) (*data_transfer_api.StoreValueResponse, error) {
@@ -44,13 +49,18 @@ func (lb *LoadBalancer) StoreValue(ctx context.Context, request *data_transfer_a
 
 	conn, err := grpc.Dial(p.GetHost(), grpc.WithInsecure())
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("failed to dial grpc connection with \"%s\": %w", p.GetHost(), err)
 	}
 	defer conn.Close()
 
 	client := data_transfer_api.NewKeyValueServiceClient(conn)
 
-	return client.StoreValue(ctx, request)
+	response, err := client.StoreValue(ctx, request)
+	if err != nil {
+		return nil, fmt.Errorf("failed to store value from host \"%s\": %w", p.GetHost(), err)
+	}
+
+	return response, nil
 }
 
 func New(o ...Option) (*LoadBalancer, error) {
