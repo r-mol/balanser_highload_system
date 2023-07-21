@@ -3,12 +3,14 @@ package balancer
 import (
 	"context"
 	"fmt"
-	data_transfer_api "github.com/r-mol/balanser_highload_system/protos"
-	log "github.com/sirupsen/logrus"
-	"google.golang.org/grpc"
 	"sync"
+	"time"
 
 	"github.com/r-mol/balanser_highload_system/internal/proxy"
+	data_transfer_api "github.com/r-mol/balanser_highload_system/protos"
+
+	log "github.com/sirupsen/logrus"
+	"google.golang.org/grpc"
 )
 
 type LoadBalancer struct {
@@ -18,6 +20,7 @@ type LoadBalancer struct {
 	mu       sync.Mutex
 	current  int32
 	reqCount int32
+	metrics  *Metrics
 	Logger   *log.Logger
 }
 
@@ -26,6 +29,10 @@ func (lb *LoadBalancer) GetValue(ctx context.Context, request *data_transfer_api
 	if err != nil {
 		return nil, fmt.Errorf("the server didn't respond: %s", err)
 	}
+
+	defer func() {
+		lb.metrics.Stat("GetValue", p.GetHost(), time.Now(), err)
+	}()
 
 	conn, err := grpc.Dial(p.GetHost(), grpc.WithInsecure())
 	if err != nil {
@@ -50,6 +57,9 @@ func (lb *LoadBalancer) StoreValue(ctx context.Context, request *data_transfer_a
 	if err != nil {
 		return nil, fmt.Errorf("the server didn't respond: %s", err)
 	}
+	defer func() {
+		lb.metrics.Stat("StoreValue", p.GetHost(), time.Now(), err)
+	}()
 
 	conn, err := grpc.Dial(p.GetHost(), grpc.WithInsecure())
 	if err != nil {
@@ -85,6 +95,7 @@ func New(o ...Option) (*LoadBalancer, error) {
 		proxies: opts.proxies,
 		mu:      opts.mu,
 		Logger:  opts.logger,
+		metrics: opts.metrics,
 	}, nil
 }
 

@@ -1,3 +1,4 @@
 .idea*
 
 protos/*.pb.go
+client_bk
