@@ -17,6 +17,6 @@ RUN cd protos && \
 
 RUN go build -o balancer ./cmd/main.go
 
-EXPOSE 8080 8081
+EXPOSE 8080 1234
 
-ENTRYPOINT ["./balancer", "start", "--config=/app/config/example-config.yaml", "--address=0.0.0.0:8080", "--prometheus_address=0.0.0.0:8081"]
+ENTRYPOINT ["./balancer", "start", "--config=/app/config/example-config.yaml", "--address=0.0.0.0:8080", "--prometheus_address=0.0.0.0:1234"]
