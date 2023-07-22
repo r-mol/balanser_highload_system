@@ -64,7 +64,7 @@ func ParseBalancerConfig(path string) (BalancerConfig, error) {
 	return config, nil
 }
 
-func GetBalancerFromConfig(config BalancerConfig) (*balancer.LoadBalancer, error) {
+func GetBalancerFromConfig(config BalancerConfig, logger *log.Logger, metrics *balancer.Metrics) (*balancer.LoadBalancer, error) {
 	proxies := map[*proxy.Proxy]int32{}
 	for _, server := range config.Servers {
 		u, err := url.Parse(server.URL)
@@ -80,9 +80,7 @@ func GetBalancerFromConfig(config BalancerConfig) (*balancer.LoadBalancer, error
 		proxies[p] = server.Priority
 	}
 
-	logger := log.New()
-	logger.Level = log.DebugLevel
-	b, err := balancer.New(balancer.WithProxies(proxies), balancer.WithLogger(logger))
+	b, err := balancer.New(balancer.WithProxies(proxies), balancer.WithLogger(logger), balancer.WithMetrics(metrics))
 	if err != nil {
 		return nil, fmt.Errorf("failed to get new balancer: %w", err)
 	}

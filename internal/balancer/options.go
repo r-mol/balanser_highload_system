@@ -11,6 +11,7 @@ type Options struct {
 	proxies weightedProxiesBunch
 	mu      sync.Mutex
 	logger  *log.Logger
+	metrics *Metrics
 }
 
 type Option func(*Options)
@@ -36,5 +37,11 @@ func WithMutex(mu sync.Mutex) Option {
 func WithLogger(logger *log.Logger) Option {
 	return func(opts *Options) {
 		opts.logger = logger
+	}
+}
+
+func WithMetrics(metrics *Metrics) Option {
+	return func(opts *Options) {
+		opts.metrics = metrics
 	}
 }
