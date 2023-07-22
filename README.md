@@ -11,7 +11,7 @@ go build -o balancer ./cmd/main.go
 ### Running 🚀
 
 ```bash
-./balancer start --config=./config/example-config.yaml --address=0.0.0.0:8080
+./balancer start --config=./config/example-config.yaml --address=0.0.0.0:8080 --prometheus_address=0.0.0.0:1234
 ```
 
 
