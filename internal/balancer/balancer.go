@@ -71,7 +71,7 @@ func (lb *LoadBalancer) StoreValue(ctx context.Context, request *data_transfer_a
 
 	response, err := client.StoreValue(ctx, request)
 	if err != nil {
-		return nil, fmt.Errorf("failed to store value from host \"%s\": %w", p.GetHost(), err)
+		return nil, fmt.Errorf("failed to store value to host \"%s\": %w", p.GetHost(), err)
 	}
 
 	lb.Logger.Infof("store value to host \"%s\"\n", p.GetHost())
