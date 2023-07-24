@@ -21,7 +21,7 @@ func WithProxies(proxies map[*proxy.Proxy]int32) Option {
 		opts.proxies = make(weightedProxiesBunch, 0, len(proxies))
 		for p, w := range proxies {
 			opts.proxies = append(opts.proxies, &proxyWithWeight{
-				Proxy:  p,
+				Client: p,
 				weight: w,
 			})
 		}

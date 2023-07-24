@@ -99,7 +99,7 @@ func New(o ...Option) (*LoadBalancer, error) {
 	}, nil
 }
 
-func (lb *LoadBalancer) Next() (*proxy.Proxy, error) {
+func (lb *LoadBalancer) Next() (proxy.Client, error) {
 	lb.mu.Lock()
 	defer lb.mu.Unlock()
 
